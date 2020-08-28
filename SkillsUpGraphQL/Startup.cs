@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GraphQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SkillsUpGraphQL.DataAccess.Repositories;
 using SkillsUpGraphQL.DataBase;
 
 namespace SkillsUpGraphQL
@@ -29,7 +31,12 @@ namespace SkillsUpGraphQL
         {
             services.AddControllers();
 
+            services.AddTransient<ITrainersRepository, TrainersRepository>();
+            services.AddTransient<IUsersRepository,UsersRepository>();
+
             services.AddDbContext<SkillsUpContext>(opt => opt.UseSqlServer(Configuration["ConnectionStrings:SkillsUpDb"]));
+
+            services.AddSingleton<IDocumentExecuter, DocumentExecuter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
