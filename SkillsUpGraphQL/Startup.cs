@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GraphiQl;
 using GraphQL;
+using GraphQL.Types;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -14,6 +16,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SkillsUpGraphQL.DataAccess.Repositories;
 using SkillsUpGraphQL.DataBase;
+using SkillsUpGraphQL.Queries;
+using SkillsUpGraphQL.Schema;
+using SkillsUpGraphQL.Types;
 
 namespace SkillsUpGraphQL
 {
@@ -29,14 +34,16 @@ namespace SkillsUpGraphQL
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
 
-            services.AddTransient<ITrainersRepository, TrainersRepository>();
-            services.AddTransient<IUsersRepository,UsersRepository>();
+            services.AddMvc();
+            services.AddScoped<ITrainersRepository, TrainersRepository>();
 
             services.AddDbContext<SkillsUpContext>(opt => opt.UseSqlServer(Configuration["ConnectionStrings:SkillsUpDb"]));
 
             services.AddSingleton<IDocumentExecuter, DocumentExecuter>();
+            services.AddScoped<TrainerQuery>();
+            services.AddScoped<TrainerType>();
+            services.AddSingleton<ISchema, SkillUpSchema>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,19 +53,10 @@ namespace SkillsUpGraphQL
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
+            app.UseGraphiQl();
 
             db.SeedData();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
         }
     }
 }
